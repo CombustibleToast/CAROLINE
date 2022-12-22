@@ -18,7 +18,7 @@ client.commands = new Collection();
 const commandsPath = path.join(__dirname, 'commands');
 //read all files in the commands folder and return an array
 const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
-
+//put commands in the array
 for (const file of commandFiles) {
 	const filePath = path.join(commandsPath, file);
 	const command = require(filePath);
@@ -30,3 +30,16 @@ for (const file of commandFiles) {
 	}
 }
 
+//same as above but for events
+//https://discordjs.guide/creating-your-bot/event-handling.html#reading-event-files
+const eventsPath = path.join(__dirname, 'events');
+const eventFiles = fs.readdirSync(eventsPath).filter(file => file.endsWith('.js'));
+for (const file of eventFiles) {
+	const filePath = path.join(eventsPath, file);
+	const event = require(filePath);
+	if (event.once) {
+		client.once(event.name, (...args) => event.execute(...args));
+	} else {
+		client.on(event.name, (...args) => event.execute(...args));
+	}
+}
