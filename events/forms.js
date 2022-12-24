@@ -1,4 +1,4 @@
-const { ButtonBuilder, ButtonStyle, ActionRowBuilder } = require("discord.js");
+const { ButtonBuilder, ButtonStyle, ActionRowBuilder, TextChannel, EmbedBuilder, TextInputAssertions, TextInputBuilder, TextInputStyle } = require("discord.js");
 
 async function initGmAndReportForm(interaction) {
     const embed = new EmbedBuilder()
@@ -22,7 +22,31 @@ async function initGmAndReportForm(interaction) {
 }
 
 async function handleGmFormSubmission(interaction) {
+    const officialChat = new TextChannel(562085662954749992); //no idea how to do this
+    const embed = new EmbedBuilder()
+        .setColor(0x0000FF)
+        .setTitle("New Game Request")
+        .setDescription(
+            `**Name:** ${interaction.fields.getTextInputValue('gmFormGameName')}\n
+            **Type:** ${interaction.fields.getTextInputValue('gmFormGameType')}\n
+            **Location:** ${interaction.fields.getTextInputValue('gmFormGameLocation')}\n
+            **System:** ${interaction.fields.getTextInputValue('gmFormGameSystem')}\n
+            **Color:** ${interaction.fields.getTextInputValue('gmFormRoleColor')}\n
+            **GM:** ${interaction.user.username}`);
 
+    const buttonRow = new ActionRowBuilder()
+        .addComponents(
+            new ButtonBuilder()
+            .setCustomId('officerConfirmGmFormSubmission')
+            .setLabel("Approve")
+            .setStyle(ButtonStyle.Success),
+            new ButtonBuilder()
+            .setCustomId('officerDenyGmFormSubmission')
+            .setLabel("Deny")
+            .setStyle(ButtonStyle.Danger)
+        )
+
+    officialChat.send({ embeds: [embed], components: [buttonRow] });
 }
 
 async function pushGmForm(interaction) {
@@ -39,8 +63,12 @@ async function pushGmForm(interaction) {
     const row1 = new ActionRowBuilder().addComponents(gameName);
 
     //Row 2
-    //type of game 
-    //3 buttons campaign series or oneshot
+    const gameType = new TextInputBuilder()
+        .setRequired(true)
+        .setCustomId('gmFormGameType')
+        .setLabel("Type of Game (Campaign, One-Shot, or Series)")
+        .setStyle(TextInputStyle.Short);
+    const row2 = new ActionRowBuilder().addComponents(gameType);
 
     //Row 3
     const gameLocation = new TextInputBuilder()
@@ -53,7 +81,7 @@ async function pushGmForm(interaction) {
     //Row 4
     const gameSystem = new TextInputBuilder()
         .setRequired(true)
-        .setCustomId('gmFormSystem')
+        .setCustomId('gmFormGameSystem')
         .setLabel("System (D&D 5e, Lancer, PbtA, etc.)")
         .setStyle(TextInputStyle.Short);
     const row4 = new ActionRowBuilder().addComponents(gameSystem);
@@ -65,13 +93,33 @@ async function pushGmForm(interaction) {
         .setStyle(TextInputStyle.Short);
     const row5 = new ActionRowBuilder().addComponents(roleColor);
 
-    modal.addComponents(row1, row3, row4, row5);
+    modal.addComponents(row1, row2, row3, row4, row5);
 
-    await interatcion.showModal(modal);
+    await interaction.showModal(modal);
 }
 
 async function handleReportFormSubmission(interaction) {
+    const officialChat = new TextChannel(562085662954749992); //no idea how to do this
+    const embed = new EmbedBuilder()
+        .setColor(0xFF0000)
+        .setTitle("User Report")
+        .setDescription(
+            `**User:** ${interaction.fields.getTextInputValue('reportFormTargetUser')}\n
+            **Reason:** ${interaction.fields.getTextInputValue('reportFormReason')}`);
 
+    const buttonRow = new ActionRowBuilder()
+        .addComponents(
+            new ButtonBuilder()
+            .setCustomId('officerConfirmGmFormSubmission')
+            .setLabel("Approve")
+            .setStyle(ButtonStyle.Success),
+            new ButtonBuilder()
+            .setCustomId('officerDenyGmFormSubmission')
+            .setLabel("Deny")
+            .setStyle(ButtonStyle.Danger)
+        )
+
+    officialChat.send({ embeds: [embed], components: [buttonRow] });
 }
 
 async function pushReportForm(interaction) {
@@ -83,13 +131,13 @@ async function pushReportForm(interaction) {
     const targetUser = new TextInputBuilder()
         .setRequired(true)
         .setCustomId('reportFormTargetUser')
-        .setLabel("Who are you reporting?")
+        .setLabel("Who are you reporting? (E.g. Glanis#3784)")
         .setStyle(TextInputStyle.Short);
     const row1 = new ActionRowBuilder().addComponents(targetUser);
 
     //Row 2
     const complaint = new TextInputBuilder()
-        .setCustomId('reportForm')
+        .setCustomId('reportFormReason')
         .setLabel("Why are you reporting them?")
         .setStyle(TextInputStyle.Paragraph);
     const row3 = new ActionRowBuilder().addComponents(complaint);
