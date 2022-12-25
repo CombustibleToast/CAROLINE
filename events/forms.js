@@ -49,6 +49,10 @@ async function handleGmFormSubmission(interaction) {
     officialChat.send({ embeds: [embed], components: [buttonRow] });
 }
 
+async function handleGmFormAccept() {
+
+}
+
 async function pushGmForm(interaction) {
     const modal = new ModalBuilder()
         .setCustomId('gmFormSubmit')
