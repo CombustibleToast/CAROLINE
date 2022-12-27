@@ -1,7 +1,5 @@
 const { Events } = require('discord.js');
-const initforms = require('../commands/initforms.js');
-require('../commands/buttoncommands.js');
-require('../commands/forms.js')
+const forms = require('../lib/forms.js')
 
 //on interaction...
 module.exports = {
@@ -35,12 +33,26 @@ module.exports = {
 async function handleSpecialCases(interaction) {
     //handle button commands
     if (interaction.isButton()) {
-        switch (interaction.customId) {
+        //console.log(`Button customID: ${interaction.customId}, matches regex: ${/officerApproveGmFormSubmission\d+/.test(interaction.customId)}`);
+        switch (/[a-zA-Z]+/.exec(interaction.customId)[0]) {
             case "gmFormButton":
-                await pushGmForm();
+                await forms.pushGmForm(interaction);
                 break;
             case "reportFormButton":
-                await pushReportForm();
+                await forms.pushReportForm(interaction);
+                break;
+            case "officerApproveGmFormSubmission":
+                console.log(`approving ${interaction.customId}`);
+                await forms.handleGmFormAccept(interaction);
+                break;
+            /*this has become a modal
+            case "officerDenyGmFormSubmission":
+                console.log(`denying ${interaction.customId}`);
+                await forms.handleGmFormDeny(interaction);
+                break;*/
+            case "officerConfirmGmFormDeny":
+                console.log(`confirming ${interaction.customId}`);
+                await forms.confirmGmFormDeny(interaction);
                 break;
             default:
                 console.log(`INVALID BUTTON ID ${interaction.customId}`);
@@ -50,21 +62,19 @@ async function handleSpecialCases(interaction) {
 
     //handle form submissions
     if (interaction.isModalSubmit) {
-        switch (interaction.customId) {
+        switch (/[a-zA-Z]+/.exec(interaction.customId)[0]) {
             case "gmFormSubmit":
-                handleGmForm(interaction);
+                forms.handleGmFormSubmission(interaction);
                 break;
             case "reportFormSubmit":
-                handleReportForm(interaction);
+                forms.handleReportFormSubmission(interaction);
                 break;
-        }
-    }
-
-    //listening to me :)
-    if (interaction.message && interaction.message.author.id == 122065561428426755) {
-        switch (interaction.message.content) {
-            case "initForms":
-                initGmAndReportForm(interaction); //forms.js
+            case "officerDenyGmFormSubmission":
+                console.log(`denying ${interaction.customId}`);
+                await forms.handleGmFormDeny(interaction);
+                break;
+            default:
+                console.log(`INVALID MODAL ID ${interaction.customId}`);
                 break;
         }
     }
