@@ -10,6 +10,7 @@ const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 
 // Log in to Discord with your client's token
 client.login(token);
+module.exports = {client};
 
 //commands collection
 client.commands = new Collection();
