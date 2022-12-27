@@ -1,2 +1,4 @@
 secrets.json
-deploycommands.js
+deploycommands.json
+data/existingGames/*
+data/gameApplications/*
