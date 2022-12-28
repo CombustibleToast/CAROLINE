@@ -19,7 +19,7 @@ client.commands = new Collection();
 const commandsPath = path.join(__dirname, 'commands');
 //read all files in the commands folder and return an array
 const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
-//put commands in the array
+//put commands in the collection
 for (const file of commandFiles) {
     const filePath = path.join(commandsPath, file);
     const command = require(filePath);
@@ -43,4 +43,34 @@ for (const file of eventFiles) {
     } else {
         client.on(event.name, (...args) => event.execute(...args));
     }
+}
+
+//same as above but for custom functions
+client.functions = new Collection();
+const functionsPath = path.join(__dirname, 'lib');
+//const functionFiles = fs.readdirSync(functionsPath).filter(file => file.endsWith('.js'));
+const functionFiles = [];
+getAllNestedFiles(functionsPath);
+console.log(`found files ${functionFiles}`);
+for(const file of functionFiles){
+    //const filePath = path.join(functionsPath, file);
+    console.log(`including ${file}`);
+    const customFunction = require(file);
+    if('name' in customFunction && 'execute' in customFunction)
+        client.functions.set(customFunction.name, customFunction);
+    else
+        console.log(`The custom function ${file} is missing a name or executable.`);
+}
+
+function getAllNestedFiles(rootDirectory){
+    fs.readdirSync(rootDirectory).forEach(File => {
+        const filePath = path.join(rootDirectory, File);
+        if(fs.statSync(filePath).isDirectory()){
+            return getAllNestedFiles(filePath);
+        }
+        else{
+            return functionFiles.push(filePath);
+        }
+    });
+    return functionFiles;
 }

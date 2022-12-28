@@ -1,8 +1,7 @@
-const { ButtonBuilder, ButtonStyle, ActionRowBuilder, TextChannel, EmbedBuilder, TextInputAssertions, TextInputBuilder, TextInputStyle, ModalBuilder, StringSelectMenuBuilder, ChannelType, PermissionFlagsBits, Colors } = require("discord.js");
-const { officialChatId, campaignCategoryId, seriesCategoryId, oneshotCategoryId, unsortedCategoryId, officerRoleId, everyoneId } = require('../secrets.json');
+const { ButtonBuilder, ButtonStyle, ActionRowBuilder, EmbedBuilder, TextInputBuilder, TextInputStyle, ModalBuilder, ChannelType, PermissionFlagsBits } = require("discord.js");
+const { officialChatId, campaignCategoryId, seriesCategoryId, oneshotCategoryId, unsortedCategoryId, officerRoleId, everyoneId, clientid } = require('../../secrets.json');
 
 module.exports = {
-    initGmAndReportForm,
     pushGmForm,
     pushReportForm,
     handleGmFormSubmission,
@@ -11,27 +10,6 @@ module.exports = {
     handleGmFormDeny,
     confirmGmFormDeny
 };
-
-async function initGmAndReportForm(interaction) {
-    const embed = new EmbedBuilder()
-        .setColor(0xFFFFFF)
-        .setTitle("Forms")
-        .setDescription("GM Form: Fill out this form to open a game in the server.\n\nReport Form: Fill out this form to send an anonymous report about another user in the server.");
-
-    const actionRow = new ActionRowBuilder()
-        .addComponents(
-            new ButtonBuilder()
-            .setCustomId("gmFormButton")
-            .setLabel("GM Form")
-            .setStyle(ButtonStyle.Primary),
-            new ButtonBuilder()
-            .setCustomId("reportFormButton")
-            .setLabel("Report Form")
-            .setStyle(ButtonStyle.Danger)
-        );
-
-    await interaction.channel.send({ embeds: [embed], components: [actionRow] });
-}
 
 async function handleGmFormSubmission(interaction) {
     await interaction.deferReply({ephemeral: true});
@@ -78,7 +56,7 @@ async function handleGmFormSubmission(interaction) {
     fs.writeFileSync(`./data/gameApplications/gmFormRequestBy_${interaction.user.id}.json`, JSON.stringify(formData));
 
     //send message
-    const client = require("../index.js").client;
+    const client = require("../../index.js").client;
     const channel = client.channels.cache.get(officialChatId);
     await channel.send({ embeds: [embed], components: [buttonRow] });
     await interaction.followUp({content: "Sent! The club officers have recieved your application and will review it shortly.", ephemeral: true});
@@ -101,8 +79,8 @@ async function handleGmFormAccept(interaction) {
     //figure out whether the game is a campaign, oneshot, or series, and put in unsorted if undetermined
     const server = interaction.guild;
     let targetCategory;
-    let targetCategoryIsUnsorted = false;
-    const client = require("../index.js").client;
+    let sortedDescriptionString = " and properly sorted.";
+    const client = require("../../index.js").client;
     switch(formData.gameType.toLowerCase().charAt(0)){
         case "c":
             targetCategory = client.channels.cache.get(campaignCategoryId);
@@ -115,7 +93,7 @@ async function handleGmFormAccept(interaction) {
             break;
         default:
             targetCategory = client.channels.cache.get(unsortedCategoryId);
-            targetCategoryIsUnsorted = true;
+            sortedDescriptionString = " but could not be sorted and needs to be moved manually."
             break;
     }
 
@@ -140,6 +118,10 @@ async function handleGmFormAccept(interaction) {
                 id: everyoneId,
                 deny: [PermissionFlagsBits.ViewChannel]
             },
+            { //allow caroline to view the channel
+                id: clientid,
+                allow: [PermissionFlagsBits.ViewChannel]
+            },
             { //allow officers to view the channel
                 id: officerRoleId,
                 allow: [PermissionFlagsBits.ViewChannel]
@@ -158,15 +140,18 @@ async function handleGmFormAccept(interaction) {
     const newChannelCreatedEmbed = new EmbedBuilder()
         .setColor(0xFFFFFF)
         .setTitle(formData.gameName)
-        .setDescription(`${formData.gameLocationAndDescription}\n\nGM: When you are ready to open the game to the club, click "Open/Close Game"\n\nPlayers: Click the "Join Game" to get the role for this game.`);
+        .setDescription(`${formData.gameLocationAndDescription}\n\n
+            GM: Post any information you would like the players to have here. When you are ready to open the game to the club, click "Open/Close Game"\n
+            When you have enough players and would like to private/close the game, click "Open/Close Game"\n\n
+            Players: Click the "Join Game" to get the role for this game.`);
     const gameActionsRow = new ActionRowBuilder()
         .addComponents(
             new ButtonBuilder()
-            .setCustomId(`gameGetRole${newRole.id}`)
+            .setCustomId(`gameGetRole${newChannel.id}`)
             .setLabel("Join Game")
             .setStyle(ButtonStyle.Primary),
             new ButtonBuilder()
-            .setCustomId(`gameTogglePrivate${newChannel.id}_${formData.userId}`)
+            .setCustomId(`gameTogglePrivate${newChannel.id}`) //for this and delete button, use the stored game data to check if the clicking user is the gm
             .setLabel("Open/Close Game")
             .setStyle(ButtonStyle.Secondary),
             new ButtonBuilder()
@@ -184,16 +169,14 @@ async function handleGmFormAccept(interaction) {
     //followup the reply in official chat
     const officialReplyEmbed = new EmbedBuilder()
         .setColor(0x00FF00)
-        .setTitle("Success");
-    if(targetCategoryIsUnsorted)
-        officialReplyEmbed.setDescription(`Application approved and channel successfully created. However, I couldn't find the right category to put it under, so it is unsorted.`);
-    else
-        officialReplyEmbed.setDescription(`Application approved and channel successfully created.`);
+        .setTitle("Success")
+        .setDescription(`Application approved, channel successfully created ${sortedDescriptionString}\n
+            Approved by ${interaction.user.tag}`);
     await interaction.followUp({embeds: [officialReplyEmbed]})
 
     //delete the request form 
     try{
-        //fs.unlinkSync(`./data/gameApplications/gmFormRequestBy_${/\d+/.exec(interaction.customId)[0]}.json`); TODO: REMOVE // BEFORE PROD
+        //fs.unlinkSync(`./data/gameApplications/gmFormRequestBy_${/\d+/.exec(interaction.customId)[0]}.json`);
     }
     catch{}
 
@@ -212,7 +195,7 @@ async function handleGmFormAccept(interaction) {
     }
 
     //write the file
-    fs.writeFileSync(`./data/existingGames/${gameData.gameName.replace(/[^a-z0-9]/gi, '_')}_${interaction.user.id}.json`, JSON.stringify(gameData));
+    fs.writeFileSync(`./data/existingGames/${gameData.gameName.replace(/[^a-z0-9]/gi, '_')}_${newChannel.id}.json`, JSON.stringify(gameData));
 }
 
 async function confirmGmFormDeny(interaction) {
@@ -228,7 +211,7 @@ async function confirmGmFormDeny(interaction) {
         const nonExistantMessageEmbed = new EmbedBuilder()
             .setColor(0x999900)
             .setTitle("Application doesn't exist or was not found.");
-        await interaction.readFileSync({embeds: [nonExistantMessageEmbed], ephemeral: true});
+        await interaction.reply({embeds: [nonExistantMessageEmbed], ephemeral: true});
     }
     
     //build confirmation form
@@ -289,7 +272,7 @@ async function handleGmFormDeny(interaction){
     const fs = require('fs');
     let success = true;
     try{
-        //fs.unlinkSync(`./data/gameApplications/gmFormRequestBy_${/\d+/.exec(interaction.customId)[0]}.json`); TODO: REMOVE // BEFORE PROD
+        fs.unlinkSync(`./data/gameApplications/gmFormRequestBy_${/\d+/.exec(interaction.customId)[0]}.json`);
         officialChatDenyConfirmationEmbed.setDescription(`Reason: ${reason}\n\nFile deleted succesfully.`);
     }
     catch(e){
@@ -395,7 +378,7 @@ async function handleReportFormSubmission(interaction) {
             `**User:** ${interaction.fields.getTextInputValue('reportFormTargetUser')}\n
             **Reason:** ${interaction.fields.getTextInputValue('reportFormReason')}`);
     
-    const client = require("../index.js").client;
+    const client = require("../../index.js").client;
     const channel = client.channels.cache.get("602596055711875083");
     await channel.send({embeds: [embed]});
     await interaction.followUp({content: "Your report has been sent to the officers.", ephemeral: true});

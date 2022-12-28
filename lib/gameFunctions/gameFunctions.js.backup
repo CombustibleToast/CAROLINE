@@ -1,0 +1,272 @@
+const { ButtonBuilder, ButtonStyle, ActionRowBuilder, EmbedBuilder, TextInputBuilder, TextInputStyle, ModalBuilder, ChannelType, PermissionFlagsBits } = require("discord.js");
+const { officialChatId, campaignCategoryId, seriesCategoryId, oneshotCategoryId, unsortedCategoryId, officerRoleId, everyoneId, clientid, closedGameCategoryId } = require('../../secrets.json');
+
+module.exports = {
+    gameGetRole,
+    gameTogglePrivate,
+    gameDeletionRequest,
+    gameConfirmDeletion,
+    gameDeletion
+};
+
+/*
+const gameActionsRow = new ActionRowBuilder()
+    .addComponents(
+        new ButtonBuilder()
+        .setCustomId(`gameGetRole${newChannel.id}`)
+        .setLabel("Join Game")
+        .setStyle(ButtonStyle.Primary),
+        new ButtonBuilder()
+        .setCustomId(`gameTogglePrivate${newChannel.id}`) //for this and delete button, use the stored game data to check if the clicking user is the gm
+        .setLabel("Open/Close Game")
+        .setStyle(ButtonStyle.Secondary),
+        new ButtonBuilder()
+        .setCustomId(`gameDeletionRequest${newChannel.id}`)
+        .setLabel("Delete Game")
+        .setStyle(ButtonStyle.Danger)
+    );
+*/
+
+function fetchGameFile(channelId){
+    fs = require('fs');
+    //`./data/existingGames/${gameData.gameName.replace(/[^a-z0-9]/gi, '_')}_${newChannel.id}.json`
+    const gameFiles = fs.readdirSync("./data/existingGames").filter(file => file.endsWith(`${channelId}.json`));
+    if(gameFiles.length < 1)
+        return undefined;
+    return JSON.parse(fs.readFileSync(`./data/existingGames/${gameFiles[0]}`));
+}
+
+function writeUpdatedFile(gameData){
+    const fs = require('fs');
+    try{
+        fs.writeFileSync(`./data/existingGames/${gameData.gameName.replace(/[^a-z0-9]/gi, '_')}_${gameData.channelId}.json`, JSON.stringify(gameData));
+    }
+    catch(e){
+        console.error(`COULD NOT WRITE UPDATED GAME FILE FOR ${gameData}`)
+    }
+}
+
+function officerCheck(member){
+    return member.roles.cache.has(officerRoleId);
+}
+
+async function gameGetRole(interaction){
+    //button id is `gameGetRole${newChannel.id}`
+    //anyone can use this button
+
+    //gather channel/game id and get the file
+    const channelId = /\d+/.exec(interaction.customId)[0];
+    const gameData = fetchGameFile(channelId);
+    if(!gameData){
+        interaction.reply(`Unable to get game data for ${channelId}. Please contact Ena or another officer if you believe this is an issue.`);
+        return;
+    }
+
+    await interaction.deferReply({ephemeral: true});
+
+    //fetch the role
+    const role = await interaction.guild.roles.fetch(gameData.roleId);
+    
+    //if the clicker already has the role, remove it from them
+    if(gameData.participants.includes(interaction.user.id)){
+        //make sure not to remove the GM's role
+        if(gameData.gmId == interaction.user.id){
+            interaction.followUp("You are the GM of this game! Your role has not been removed.");
+            return;
+        }
+        //clicker is not the gm, remove the role
+        await interaction.member.roles.remove(gameData.roleId);
+        gameData.participants.remove(interaction.user.id);
+        writeUpdatedFile(gameData);
+        interaction.followUp(`You have left ${gameData.gameName}.`);
+
+        //if the game is closed, then the user can't see the response, so DM them as well
+        if(gameData.status == "closed")
+            interaction.user.send(`You have left ${gameData.gameName}.`)
+        
+        return;
+    }
+
+    //give the clicker the role
+    await interaction.member.roles.add(role);
+    gameData.participants.push(interaction.user.id);
+    writeUpdatedFile(gameData);
+    //reply to the user
+    interaction.followUp(`You've joined ${gameData.gameName}!`);
+}
+
+async function gameTogglePrivate(interaction){
+    //button id is `gameTogglePrivate${newChannel.id}`
+    //only the GM can press this button
+
+    //gather channel/game id and get the file
+    const channelId = /\d+/.exec(interaction.customId)[0];
+    const gameData = fetchGameFile(channelId);
+    if(!gameData){
+        interaction.reply(`Unable to get game data for ${channelId}. Please contact Ena or another officer if you believe this is an issue.`);
+        return;
+    }
+
+    interaction.deferReply({ephemeral: true});
+
+    //check if the user is the gm, deny if not (also allow officers to do this)
+    if(interaction.user.id != gameData.gmId && !officerCheck(interaction.member)){
+        interaction.followUp("Only the GM may use this function.");
+        return;
+    }
+
+    //move the channel if it's a campaign
+    if(gameData.gameType.toLowerCase().charAt(0) != "c"){
+        interaction.followUp("Only campaigns can be closed.");
+        return;
+    }
+    
+    //if the campaign is open, move it to closed, and visa versa
+    if(gameData.status == "open"){
+        await interaction.guild.channels.fetch(closedGameCategoryId)
+            .then(category => interaction.channel.setParent(category, {lockPermissions: false}));
+        gameData.status = "closed";
+    }
+    else{//gameData.status == "closed"
+        let targetCategory;
+        switch(gameData.gameType.toLowerCase().charAt(0)){
+            case "c": targetCategory = campaignCategoryId; break;
+            case "s": targetCategory = seriesCategoryId; break;
+            case "o": targetCategory = oneshotCategoryId; break;
+            default: targetCategory = unsortedCategoryId; break;
+        }
+        await interaction.guild.channels.fetch(targetCategory)
+            .then(category => interaction.channel.setParent(category, {lockPermissions: false}));
+        gameData.status = "open";
+    }
+
+    //reply to the gm
+    interaction.followUp(`${gameData.gameName} is now ${gameData.status}.`);
+
+    //update the file
+    writeUpdatedFile(gameData);
+}
+
+async function gameDeletionRequest(interaction){
+    //.setCustomId(`gameDeletionRequest${newChannel.id}`)
+    //only the GM and officers should be able to press this button
+
+    //gather channel/game id and get the file
+    const channelId = /\d+/.exec(interaction.customId)[0];
+    const gameData = fetchGameFile(channelId);
+    if(!gameData){
+        interaction.reply(`Unable to get game data for ${channelId}. Please contact Ena or another officer if you believe this is an issue.`);
+        return;
+    }
+
+    interaction.deferReply({ephemeral: true});
+
+    //check if the user is the gm, deny if not (also allow officers to do this)
+    if(interaction.user.id != gameData.gmId && !officerCheck(interaction.member)){
+        interaction.followUp({content: "Only the GM may use this function.", ephemeral: true});
+        return;
+    }
+
+    //build embed and confirm button to be sent in chat
+    const officialChatConfirmationEmbed = new EmbedBuilder()
+        .setColor(0xFFAA22)
+        .setTitle("Game Deletion Request")
+        .setDescription(`${interaction.user.tag} has requested the deletion of ${gameData.gameName}.\nPlease consult with them before confirming the deletion.`);
+    const officialChatConfirmDeleteRow = new ActionRowBuilder().addComponents(
+        new ButtonBuilder()
+        .setCustomId(`gameConfirmDeletion${gameData.channelId}`)
+        .setStyle(ButtonStyle.Danger)
+        .setLabel("Confirm Deletion")
+    );
+    await interaction.guild.channels.fetch(officialChatId)
+        .then(channel => channel.send({embeds:[officialChatConfirmationEmbed], components:[officialChatConfirmDeleteRow]}));
+
+    //reply to the clicker
+    await interaction.followUp("Your request has been sent to the officers, they will be in touch shortly.");
+}
+
+async function gameConfirmDeletion(interaction){
+    //.setCustomId(`confirmGameDeletion${gameData.channelId}`)
+    //this will be sent to official chat and will be clicked by an officer
+
+    //gather channel/game id
+    const channelId = /\d+/.exec(interaction.customId)[0];
+
+    if(!officerCheck(interaction.member)){
+        interaction.reply({content: "You are not authorized to perform this action.", ephemeral: true});
+        return;
+    }
+
+    //build modal for confirming deletion
+    //build confirmation form
+    const confirmModal = new ModalBuilder()
+        .setCustomId(`gameDeletion${channelId}`)
+        .setTitle('Confirm Game Deletion');
+
+    //Row 1
+    const reason = new TextInputBuilder()
+        .setRequired(true)
+        .setCustomId('gameDeleteReason')
+        .setLabel("Reason for Deletion")
+        .setStyle(TextInputStyle.Paragraph);
+    const row1 = new ActionRowBuilder().addComponents(reason);
+
+    //Row 2
+    const confirmation = new TextInputBuilder()
+        .setRequired(true)
+        .setCustomId('gameDeletionConfirmCheck')
+        .setLabel("Type \"Confirm\"")
+        .setStyle(TextInputStyle.Short);
+    const row2 = new ActionRowBuilder().addComponents(confirmation);
+    
+    //push form
+    confirmModal.addComponents(row1, row2);
+    await interaction.showModal(confirmModal);
+}
+
+async function gameDeletion(interaction){
+    //delete the game after everything is confirmed
+    //only an officer can do this
+
+    //only allow officers to perform this action
+    if(!officerCheck(interaction.member)){
+        interaction.reply({content:"You are not authorized to perform this action.", ephemeral: true});
+        return;
+    }
+
+    //the deleter must confirm the deletion
+    if(interaction.fields.getTextInputValue('gameDeletionConfirmCheck').toLowerCase() != "confirm"){
+        interaction.reply({content:"You failed to confirm the deletion. The game has not been deleted.", ephemeral: true});
+        return;
+    }
+
+    //gather channel/game id and get the file
+    const channelId = /\d+/.exec(interaction.customId)[0];
+    const gameData = fetchGameFile(channelId);
+    if(!gameData){
+        interaction.reply(`Unable to get game data for ${channelId}. Please contact Ena if you believe this is an issue.`);
+        return;
+    }
+
+    //checks passed
+    //delete the role
+    await interaction.guild.roles.fetch(gameData.roleId)
+        .then(role => interaction.guild.roles.delete(role, interaction.fields.getTextInputValue('gameDeletionReason')));
+
+    //delete the channel
+    await interaction.guild.channels.fetch(gameData.channelId)
+        .then(channel => interaction.guild.channels.delete(channel, interaction.fields.getTextInputValue('gameDeletionReason')));
+    
+    //archive the game data because why not
+    const fs = require('fs');
+    const oldPath = `./data/existingGames/${gameData.gameName.replace(/[^a-z0-9]/gi, '_')}_${gameData.channelId}.json`;
+    const newPath = `./data/archivedGames/${gameData.gameName.replace(/[^a-z0-9]/gi, '_')}_${gameData.channelId}.json`;
+    fs.renameSync(oldPath, newPath);
+
+    //send a notification in official chat
+    const channelDeletedEmbed = new EmbedBuilder()
+        .setColor(0x44EE22)
+        .setTitle(`${interaction.user.tag} has deleted the game "${gameData.gameName}."`)
+        .setDescription(`Reason: ${interaction.fields.getTextInputValue('gameDeletionReason')}`);
+    interaction.followUp({embeds: [channelDeletedEmbed]});
+}

@@ -1,36 +1,66 @@
 const { Events } = require('discord.js');
-const forms = require('../lib/forms.js')
 
 //on interaction...
 module.exports = {
     name: Events.InteractionCreate,
     async execute(interaction) {
-        await handleSpecialCases(interaction);
+        //handle slash commands
+        if (interaction.isChatInputCommand()) {
+            //console.log(interaction);
 
-        //only handle slash commands
-        if (!interaction.isChatInputCommand()) return;
-        //console.log(interaction);
+            //store the command
+            const command = interaction.client.commands.get(interaction.commandName);
+            console.log(`${interaction.user.tag} is performing command ${interaction.commandName}`);
+            
+            //do nothing if the command doesn't exist
+            if (!command) {
+                console.error(`No command matching ${interaction.commandName} was found.`);
+                return;
+            }
 
-        //store the command
-        const command = interaction.client.commands.get(interaction.commandName);
+            //try executing the command
+            try {
+                await command.execute(interaction);
+            } catch (error) {
+                console.error(error);
+                if(!interaction.replied && !interaction.deferred)
+                    await interaction.reply({ content: 'There was an error while executing your command.', ephemeral: true });
+                else
+                    await interaction.followUp({ content: 'There was an error while executing your command.', ephemeral: true });
+            }
+            return;
+        }
+        
+        //handle functions
+        const funcName = /[a-zA-Z]+/.exec(interaction.customId)[0];
+        console.log(`${interaction.user.tag} is performing function ${funcName}`);
 
-        //do nothing if the command doesn't exist
-        if (!command) {
-            console.error(`No command matching ${interaction.commandName} was found.`);
+        //get the associated function
+        const func = interaction.client.functions.get(funcName);
+
+        //do nothing if the function doesn't exist
+        if(!func){
+            console.error(`No function with the name ${funcName}`);
             return;
         }
 
-        //try executing the command
+        //try executing the function
         try {
-            await command.execute(interaction);
-        } catch (error) {
-            console.error(error);
-            await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
+            await func.execute(interaction);
+        }
+        catch (e) {
+            console.error(`Error processing function ${funcName}:`);
+            console.error(e);
+            if(!interaction.replied && !interaction.deferred)
+                await interaction.reply({content: "There was an error processing your request.", ephemeral: true});
+            else
+                await interaction.followUp({content: "There was an error processing your request.", ephemeral: true});
         }
     }
 }
 
-async function handleSpecialCases(interaction) {
+/*
+async function handleFunctions(interaction) {
     //handle button commands
     if (interaction.isButton()) {
         //console.log(`Button customID: ${interaction.customId}, matches regex: ${/officerApproveGmFormSubmission\d+/.test(interaction.customId)}`);
@@ -49,7 +79,7 @@ async function handleSpecialCases(interaction) {
             case "officerDenyGmFormSubmission":
                 console.log(`denying ${interaction.customId}`);
                 await forms.handleGmFormDeny(interaction);
-                break;*/
+                break;/
             case "officerConfirmGmFormDeny":
                 console.log(`confirming ${interaction.customId}`);
                 await forms.confirmGmFormDeny(interaction);
@@ -78,4 +108,4 @@ async function handleSpecialCases(interaction) {
                 break;
         }
     }
-}
+}*/
