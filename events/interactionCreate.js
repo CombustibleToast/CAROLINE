@@ -1,10 +1,16 @@
 const { Events } = require('discord.js');
-const { cooldownTime } = require('../secrets.json');
+const { cooldownTime, productionGuildId } = require('../secrets.json');
 
 //on interaction...
 module.exports = {
     name: Events.InteractionCreate,
     async execute(interaction) {
+        //check if this iteration of the bot services this guild
+        if(interaction.guild.id != productionGuildId){
+            console.log(`Received a request from another guild ${interaction.guild.id}`);
+            return;
+        }
+        
         //check if the user is on cooldown
         const cooldowns = interaction.client.cooldowns;
         const userId = interaction.user.id;
