@@ -62,6 +62,9 @@ for(const file of functionFiles){
         console.log(`The custom function ${file} is missing a name or executable.`);
 }
 
+//initialize cooldown collection for rate limiting, the rest is handled in interactioncreate.js
+client.cooldowns = new Collection();
+
 function getAllNestedFiles(rootDirectory){
     fs.readdirSync(rootDirectory).forEach(File => {
         const filePath = path.join(rootDirectory, File);
