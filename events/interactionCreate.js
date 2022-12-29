@@ -1,9 +1,29 @@
 const { Events } = require('discord.js');
+const { cooldownTime } = require('../secrets.json');
 
 //on interaction...
 module.exports = {
     name: Events.InteractionCreate,
     async execute(interaction) {
+        //check if the user is on cooldown
+        const cooldowns = interaction.client.cooldowns;
+        const userId = interaction.user.id;
+        if(cooldowns.has(userId) && userId != "122065561428426755"){
+            //user is on cooldown, reply to them as such and don't do anything else.
+            console.log(`User is con cooldown: ${interaction.user.tag}`);
+            interaction.reply({content: `Please wait ${cooldownTime} seconds between requests.`, ephemeral: true});
+            return;
+        }
+        else if(userId != "122065561428426755"){
+            //user is not on cooldown, don't stop them.
+            cooldowns.set(userId, interaction);
+            console.log(`Added ${userId} to cooldowns.`);
+            setTimeout(() => {
+                cooldowns.delete(userId);
+                console.log(`Removed ${userId} from cooldowns.`);
+            }, cooldownTime * 3000);
+        }
+
         //handle slash commands
         if (interaction.isChatInputCommand()) {
             //console.log(interaction);
