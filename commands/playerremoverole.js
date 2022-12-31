@@ -3,7 +3,7 @@ const { officerCheck, fetchGameFile, writeUpdatedFile } = require("../lib/common
 
 module.exports = {
     data: new SlashCommandBuilder()
-        .setName('removerole')
+        .setName('playerremoverole')
         .setDescription("Remove a role from a user. Officer use only.")
         .addUserOption(option =>
             option.setName('target')
@@ -18,17 +18,15 @@ module.exports = {
     async execute(interaction) {
         await interaction.deferReply({ ephemeral: true });
 
-        //collect member and fetch gameData
-        const member = interaction.options.getMember('target')
-        console.log(`member is ${member}`)
-        console.log(`user is ${interaction.options.getUser('target')}`)
-        const gameData = fetchGameFile(interaction.options.getChannel('gamechannel').id);
-
         //only officers are allowed to use this command
-        if (!officerCheck(member)) {
+        if (!officerCheck(interaction.member)) {
             interaction.followUp({ content: "You are not authorized to use this command.", ephemeral: true });
             return;
         }
+
+        //collect member and fetch gameData
+        const member = interaction.options.getMember('target');
+        const gameData = fetchGameFile(interaction.options.getChannel('gamechannel').id);
 
         if (!gameData) {
             interaction.followUp({ content: "Could not find the file of the game. Please contact Ena if you think this is an issue.", ephemeral: true });
