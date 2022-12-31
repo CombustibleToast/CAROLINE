@@ -1,6 +1,6 @@
 const { EmbedBuilder, ActionRowBuilder, ButtonBuilder } = require("@discordjs/builders");
 const { SlashCommandBuilder, ButtonStyle } = require("discord.js");
-const { fetchGameFile } = require("../lib/common.js")
+const { fetchGameFile, officerCheck } = require("../lib/common.js")
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -23,8 +23,8 @@ module.exports = {
             return;
         }
 
-        //check if user is the gm, deny if not
-        if (interaction.user.id != gameData.gmId) {
+        //check if user is the gm, deny if not (also allow officers to do this)
+        if (officerCheck(interaction.member) || interaction.user.id == gameData.gmId) {
             interaction.followUp("Only the GM may use this command.");
             return;
         }
