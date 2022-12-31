@@ -9,7 +9,7 @@ module.exports = {
 
     //the funciton to be run
     async execute(interaction) {
-        if (!officerCheck()) {
+        if (!officerCheck(interaction.member)) {
             await interaction.reply({ content: "You are not authorized to use this command.", ephemeral: true });
             return;
         }
@@ -27,15 +27,15 @@ module.exports = {
                 .addOptions(
                     {
                         label: "Campaign",
-                        value: "c"
+                        value: "Campaign"
                     },
                     {
                         label: "Series",
-                        value: "s"
+                        value: "Series"
                     },
                     {
                         label: "Oneshot",
-                        value: "o"
+                        value: "Oneshot"
                     }
                 )
         );
