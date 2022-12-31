@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, resolveColor, TextInputStyle } = require("discord.js");
+const { SlashCommandBuilder } = require("discord.js");
 
 module.exports = {
     //command definition for discord API
@@ -20,7 +20,6 @@ module.exports = {
 }
 
 async function standardRoll(query){
-    console.log(`query: ${query}`);
     //query is a string
     //whitespace removal
     query.replace(/\s/g,'').trim();
@@ -28,10 +27,14 @@ async function standardRoll(query){
     //tokenize the string and keep the operators which act as the delimiters
     //https://medium.com/@shemar.gordon32/how-to-split-and-keep-the-delimiter-s-d433fb697c65 
     const tokens = query.split(/(?=[+\-*/%\(\)])|(?<=[+\-*/%\(\)])/g); //(, ), and - need to be escaped
-    console.log(tokens);
 
     //compute the request
     const result = roll(tokens);
+
+    //output error if there was one
+    if(result.error){
+        return `There was an error processing your roll "${query}":\n\`\`\`Invalid Term: ${result.term}\`\`\``
+    }
     
     //done with computation, compile the response
     return compileResponse(query, result.rolls, result.total);
@@ -51,8 +54,28 @@ function roll(tokens){
         const curToken = tokens.shift();
         console.log(`cur token ${curToken}`);
 
+        //if the token is a left parenthesis, just push it
+        if(curToken == "(")
+            operators.push(curToken);
+        
+        //if the token is a right parenthesis, resolve until top operator is a left parenthesis, then discard the top operator
+        else if(curToken == ")"){
+            while(operators[operators.length-1] != "(")
+                values.push(performOperation(operators.pop(), values.pop(), values.pop()));
+            operators.pop();
+        }
+        
+        //if the token is an operator...
+        else if(/[+\-*/%]/.test(curToken)){
+            //...and while the op stack is not empty and the top item has a greater precedence, resolve
+            while(operators.length > 0 && comparePrecedence(operators[operators.length-1], curToken))
+                values.push(performOperation(operators.pop(), values.pop(), values.pop()));
+            //then push the current operator
+            operators.push(curToken);
+        }
+
         //if the token is a value (const or dice term), push it onto the value stack
-        if(/\d/g.test(curToken)){
+        else{ //if(/\d/g.test(curToken)){
             let curValue;
             //if the term is a dice value
             if(/d/.test(curToken))
@@ -60,29 +83,16 @@ function roll(tokens){
             //else the term is a number
             else
                 curValue = {value: parseInt(curToken), term: curToken, rolled: false};
+
+            //if there was an error rolling the term
+            if(curValue.error){
+                console.log(`error value: ${curValue.term}`);
+                return {error: true, term: curValue.term}
+            }
+
             values.push(curValue);
             if(curValue.rolled == true)
                 rollObjects.push(curValue);
-        }
-
-        //if the token is a left parenthesis, just push it
-        if(curToken == "(")
-            operators.push(curToken);
-        
-        //if the token is a right parenthesis, resolve until top operator is a left parenthesis, then discard the top operator
-        if(curToken == ")"){
-            while(operators[operators.length-1] != "(")
-                values.push(performOperation(operators.pop(), values.pop(), values.pop()));
-            operators.pop();
-        }
-        
-        //if the token is an operator...
-        if(/[+\-*/%]/.test(curToken)){
-            //...and while the op stack is not empty and the top item has a greater precedence, resolve
-            while(operators.length > 0 && comparePrecedence(operators[operators.length-1], curToken))
-                values.push(performOperation(operators.pop(), values.pop(), values.pop()));
-            //then push the current operator
-            operators.push(curToken);
         }
     }
 
@@ -95,20 +105,33 @@ function roll(tokens){
 
 function compileResponse(query, objs, finalVal){
     let notifyStats = false;
-    re = `**${finalVal}**\n${query}:\`\`\`diff\n`;
+    re = `**${finalVal}**\nQuery: ${query}`;
+    if(objs.length == 0)
+        return re;
+    re += `\`\`\`diff\n`;
     for(const term of objs){
         re += `+ ${term.term.trim()}: `;
         for(const roll of term.rolls)
-            re += `${roll} `
+            re += `${roll} `;
         re += "\n";
     }
     return re + "```";
 }
 
 function collapseDiceValue(term){
-    if(!/\d*d\d+((dl|kh)\d+|)/.test(term))
-        throw `Invalid dice term ${term}`;
-    
+    if(!/\d*d\d+((dl|kh)\d+|)/.test(term)){
+        console.log('invalid dice term');
+
+        return {
+            value : undefined,
+            rolls : undefined,
+            keptRolls : undefined,
+            term : term,
+            rolled : true,
+            error: true
+        }
+    }
+    console.log('valid dice term');
     //parse the term into values
     const dice = /\d*d\d+/.exec(term)[0];
     const numDice = isNaN(parseInt(dice.substring(0, dice.indexOf("d")))) ? 1 : parseInt(dice.substring(0, dice.indexOf("d")));
