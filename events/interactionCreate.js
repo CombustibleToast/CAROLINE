@@ -1,12 +1,12 @@
-const { Events } = require('discord.js');
+const { Events, DMChannel } = require('discord.js');
 const { cooldownTime, productionGuildId } = require('../secrets.json');
 
 //on interaction...
 module.exports = {
     name: Events.InteractionCreate,
     async execute(interaction) {
-        //check if this iteration of the bot services this guild
-        if(interaction.guild.id != productionGuildId){
+        //check if this iteration of the bot services this guild but allow all DMs
+        if(interaction.guild != null && interaction.guild.id != productionGuildId){
             console.log(`Received a request from another guild ${interaction.guild.id}`);
             return;
         }
@@ -75,12 +75,16 @@ module.exports = {
             await func.execute(interaction);
         }
         catch (e) {
-            console.error(`Error processing function ${funcName}:`);
-            console.error(e);
-            if(!interaction.replied && !interaction.deferred)
-                await interaction.reply({content: "There was an error processing your request.", ephemeral: true});
-            else
-                await interaction.followUp({content: "There was an error processing your request.", ephemeral: true});
+            console.error(`[WARN] Error processing function ${funcName}:\n${e}`);
+            try{
+                if(!interaction.replied && !interaction.deferred)
+                    await interaction.reply({content: "There was an error processing your request.", ephemeral: true});
+                else
+                    await interaction.followUp({content: "There was an error processing your request.", ephemeral: true});
+            }
+            catch(e){
+                console.log(`[INFO] Unable to reply to user after function failure:\n${e}`);
+            }
         }
     }
 }
