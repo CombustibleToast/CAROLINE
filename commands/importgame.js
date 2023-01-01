@@ -45,12 +45,18 @@ module.exports = {
 
         await interaction.deferReply({ ephemeral: true });
 
+        //compile list of existing participants
+        const existingParticipants = [];
+        await interaction.options.getRole('role')
+            .each(member => existingParticipants.push(member.id));
+
         //create a new gamedata object
         const gameData = {
             created: Date.now(),
             imported: true,
             gmId: interaction.options.getUser('gm').id,
-            participants: [interaction.options.getUser('gm').id],
+            //participants: [interaction.options.getUser('gm').id],
+            participants: existingParticipants,
             status: interaction.options.getBoolean('isclosed') ? "closed" : "open",
             joinability: "restricted",
             roleId: interaction.options.getRole('role').id,
