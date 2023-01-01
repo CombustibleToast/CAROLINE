@@ -1,5 +1,5 @@
-secrets.json
+secrets*
 deploycommands.json
-data/existingGames/*
-data/gameApplications/*
-data/archivedGames/*
+data/existingGames/*.json
+data/gameApplications/*.json
+data/archivedGames/*.json
