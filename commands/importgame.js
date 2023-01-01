@@ -49,6 +49,7 @@ module.exports = {
         const existingParticipants = [];
         await interaction.options.getRole('role').members
             .each(member => existingParticipants.push(member.id));
+        console.log(`Import compiled a list of all role-having members: ${existingParticipants}`);
 
         //create a new gamedata object
         const gameData = {
