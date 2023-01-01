@@ -75,7 +75,7 @@ module.exports = {
             await func.execute(interaction);
         }
         catch (e) {
-            console.error(`[WARN] Error processing function ${funcName}:\n${e}`);
+            console.error(`[WARN] Error processing function ${funcName}:\n${e.stack}`);
             try{
                 if(!interaction.replied && !interaction.deferred)
                     await interaction.reply({content: "There was an error processing your request.", ephemeral: true});
