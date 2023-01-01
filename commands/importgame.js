@@ -32,8 +32,8 @@ module.exports = {
         )
         .addStringOption(option =>
             option.setName('system')
-                .setRequired(false)
-                .setDescription("The system of the game.")
+                .setRequired(true)
+                .setDescription("The system of the game (D&D 5e, Lancer, etc.).")
         ),
 
     async execute(interaction) {
