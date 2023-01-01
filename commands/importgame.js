@@ -52,7 +52,7 @@ module.exports = {
             gmId: interaction.options.getUser('gm').id,
             participants: [interaction.options.getUser('gm').id],
             status: interaction.options.getBoolean('isclosed') ? "closed" : "open",
-            joinability: "free",
+            joinability: "restricted",
             roleId: interaction.options.getRole('role').id,
             channelId: interaction.channel.id,
             gameName: interaction.options.getString('gamename'),
@@ -85,11 +85,11 @@ module.exports = {
             .setColor(interaction.options.getRole('role').color)
             .setTitle(gameData.gameName)
             .setDescription(`
-                GM: Post any information you would like the players to have here. When you are ready to open the game to the club, click "Open/Close Game"\n
-                When you have enough players and would like to close the game, click "Open/Close Game"\n\n
-                Players: Click the "Join/Leave Game" to get/remove the role for this game.`);
+                Imported pre-existing game.\n
+                **GM:** If you would like to open/close your game to the public, click open/close game.\n
+                **Players:** Click the "Join/Leave Game" to get/remove the role for this game.`);
         const gameActionsRow = new ActionRowBuilder()
-            .addComponents(
+            .addComponents( 
                 new ButtonBuilder()
                     .setCustomId(`gameJoinReq${gameData.channelId}`)
                     .setLabel("Join/Leave Game")
@@ -114,7 +114,8 @@ module.exports = {
         console.log(`Import wrote the file to ./data/existingGames/${gameData.gameName.replace(/[^a-z0-9]/gi, '_')}_${gameData.channelId}.json`);
 
         //send the message to the channel
-        await interaction.channel.send({ embeds: [embed], components: [gameActionsRow] });
+        await interaction.channel.send({ embeds: [embed], components: [gameActionsRow] })
+            .then(message => message.pin());
         console.log("Import sent the initial message");
 
         interaction.followUp("Done.");
