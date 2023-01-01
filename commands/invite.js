@@ -24,7 +24,7 @@ module.exports = {
         }
 
         //check if user is the gm, deny if not (also allow officers to do this)
-        if (officerCheck(interaction.member) || interaction.user.id == gameData.gmId) {
+        if (interaction.user.id != gameData.gmId && !officerCheck(interaction.member)) {
             interaction.followUp("Only the GM may use this command.");
             return;
         }
@@ -32,17 +32,23 @@ module.exports = {
         //collect target member
         const targetMember = interaction.options.getMember('recipient');
 
-        //check if the user is already in the game, deny if so
+        //check if the target is the gm, deny if so
+        if(gameData.gmId == targetMember.id){
+            interaction.followUp("You are the GM of this game!");
+            return;
+        }
+
+        //check if the target is already in the game, deny if so
         if (gameData.participants.indexOf(targetMember.id) != -1){
-            interaction.followUp(`${interaction.user.tag} is already a player!`);
+            interaction.followUp(`${targetMember.user.tag} is already a player!`);
             return;
         }
 
         //build invite embed and buttons
         const inviteEmbed = new EmbedBuilder()
             .setTitle(`Invitation to join ${gameData.gameName}`)
-            .setDescription(`The gm of ${gameData.gameName} has invited you to join their game!`)
-            .setColor(gameData.roleColor);
+            .setDescription(`The GM of ${gameData.gameName} has invited you to join their game!`)
+            .setColor(0x33ee22);
         const buttonRow = new ActionRowBuilder().addComponents(
             new ButtonBuilder()
                 .setCustomId(`gameInvAccept${gameData.channelId}`)
