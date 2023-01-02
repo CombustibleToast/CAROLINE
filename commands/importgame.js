@@ -46,10 +46,16 @@ module.exports = {
         await interaction.deferReply({ ephemeral: true });
 
         //compile list of existing participants
+        //doing role.members will have only one member with the role, posted to stackoverflow
+        //https://stackoverflow.com/questions/74978493/role-members-only-contains-a-single-value-when-there-are-multiple 
+        /*
         const existingParticipants = [];
-        await interaction.options.getRole('role').members
-            .each(member => existingParticipants.push(member.id));
+        await interaction.guild.roles.fetch(interaction.options.getRole('role').id, { force: true })
+            .then(role => role.members
+                .forEach(member => existingParticipants.push(member.id)))
         console.log(`Import compiled a list of all role-having members: ${existingParticipants}`);
+
+        return;*/
 
         //create a new gamedata object
         const gameData = {
@@ -78,10 +84,10 @@ module.exports = {
         console.log("Import did not find a preexisting file for the game.");
 
         //give caroline permission to view the channel
-        try{
+        try {
             await interaction.channel.permissionOverwrites.edit(interaction.client.user, { 'ViewChannel': true })
         }
-        catch(e){
+        catch (e) {
             interaction.followUp("Failed. Please edit the channel permissions to allow CAROLINE to view the channel.");
             return;
         }
@@ -96,7 +102,7 @@ module.exports = {
                 **GM:** If you would like to open/close your game to the public, click open/close game.\n
                 **Players:** Click the "Join/Leave Game" to get/remove the role for this game.`);
         const gameActionsRow = new ActionRowBuilder()
-            .addComponents( 
+            .addComponents(
                 new ButtonBuilder()
                     .setCustomId(`gameJoinReq${gameData.channelId}`)
                     .setLabel("Join/Leave Game")
