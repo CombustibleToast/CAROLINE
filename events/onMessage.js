@@ -5,6 +5,7 @@ const { productionGuildId } = require('../secrets.json');
 module.exports = {
     name: Events.MessageCreate,
     execute(message){
+        return;
         //check if this iteration of the bot services this guild but allow all DMs
         if(message.guild != null && message.guild.id != productionGuildId){
             console.log(`Received a message from another guild ${message.guild.id}`);
