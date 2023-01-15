@@ -14,6 +14,11 @@ module.exports = {
         if(message.author.bot)
             return;
         console.log("got message");
-        client.functions.find(func => func.trigger ? message.content == func.trigger : false).execute(message);
+        try{
+            client.functions.find(func => func.trigger ? message.content == func.trigger : false).execute(message);
+        }
+        catch(e){
+            console.error(`Couldn't act on a message event:\n${e.stack}`);
+        }
     }
 }
