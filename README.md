@@ -1,4 +1,3 @@
-![CAROLINE's ICON](https://cdn.discordapp.com/attachments/339563014476922880/1067613489360805978/caroline_head.png)
 # CAROLINE - A Discord Bot Created for GMU's TTRPG Club
 CAROLINE was created to streamline the creation and maintenance of members' self-owned games within the club's Discord server. Powered by Discord.js v14 and NodeJS.
 
