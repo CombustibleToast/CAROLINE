@@ -16,18 +16,16 @@ module.exports = {
         const userId = interaction.user.id;
         if(cooldowns.has(userId) && userId != "122065561428426755"){
             //user is on cooldown, reply to them as such and don't do anything else.
-            console.log(`User is con cooldown: ${interaction.user.tag}`);
-            interaction.reply({content: `Please wait ${cooldownTime} seconds between requests.`, ephemeral: true});
+            console.log(`User is on cooldown: ${interaction.user.tag}`);
+            interaction.reply({content: `Please wait ${cooldownTime} second(s) between requests.`, ephemeral: true});
             return;
         }
         else if(userId != "122065561428426755"){
             //user is not on cooldown, don't stop them.
             cooldowns.set(userId, interaction);
-            console.log(`Added ${userId} to cooldowns.`);
             setTimeout(() => {
                 cooldowns.delete(userId);
-                console.log(`Removed ${userId} from cooldowns.`);
-            }, cooldownTime * 3000);
+            }, cooldownTime * 1000);
         }
 
         //handle slash commands
@@ -36,7 +34,7 @@ module.exports = {
 
             //store the command
             const command = interaction.client.commands.get(interaction.commandName);
-            console.log(`${interaction.user.tag} is performing command ${interaction.commandName}`);
+            console.log(`${command == "pushReportForm" || command == "reportFormSubmission" ? "someone" : interaction.user.tag} is performing command ${interaction.commandName}`);
             
             //do nothing if the command doesn't exist
             if (!command) {
