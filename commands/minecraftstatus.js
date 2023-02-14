@@ -17,6 +17,7 @@ module.exports = {
         await fetch(url, settings)
             .then(response => response.json())
             .then((json) => {
+                console.log(json.software);
                 let embed;
                 if(json.online)
                     embed = buildOnlineEmbed(json);
@@ -42,9 +43,9 @@ function buildOfflineEmbed(data){
 
 function buildOnlineEmbed(data){
     const playersOnlineStatus = data.players.online = 0 ? "Nobody is currently playing." : `Currently online: ${data.players.list}`;
-    const modsStatus = `Mods: ${data.mods ? "Yes" : "Nope"}`;
+    //const modsStatus = `Mods: ${data.mods ? "Yes" : "Nope"}`; //doesn't detect mods for some reason
 
-    let description = `${playersOnlineStatus}\n${modsStatus}`;
+    let description = `${playersOnlineStatus}\nJoin in at tosat.ddns.net`;
     const embed = new EmbedBuilder()
         .setColor("22ee66")
         .setTitle("The Server is Online!")
