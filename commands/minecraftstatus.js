@@ -17,7 +17,7 @@ module.exports = {
         await fetch(url, settings)
             .then(response => response.json())
             .then((json) => {
-                console.log(json.software);
+                console.log(json.players.online);
                 let embed;
                 if(json.online)
                     embed = buildOnlineEmbed(json);
@@ -42,7 +42,7 @@ function buildOfflineEmbed(data){
 }
 
 function buildOnlineEmbed(data){
-    const playersOnlineStatus = data.players.online = 0 ? "Nobody is currently playing." : `Currently online: ${data.players.list}`;
+    const playersOnlineStatus = data.players.online == 0 ? "Nobody is currently playing." : `Currently online: ${data.players.list}`;
     //const modsStatus = `Mods: ${data.mods ? "Yes" : "Nope"}`; //doesn't detect mods for some reason
 
     let description = `${playersOnlineStatus}\nJoin in at tosat.ddns.net`;
