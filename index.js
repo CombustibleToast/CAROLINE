@@ -3,14 +3,17 @@ const fs = require('node:fs');
 const path = require('node:path');
 // Require the necessary discord.js classes
 const { Client, Collection, Events, GatewayIntentBits } = require('discord.js');
-const { token } = require('./secrets.json');
+const { token, loudspeakerTokens } = require('./secrets.json');
 
-// Create a new client instance
+// Create a new client instance for CAROLINE
 const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers, GatewayIntentBits.DirectMessages, GatewayIntentBits.MessageContent, GatewayIntentBits.GuildMessages] });
 
 // Log in to Discord with your client's token
 client.login(token);
 module.exports = {client};
+
+//create instances for loudspeakers
+const loudspeakerClients = loginLoudspeakerClients();
 
 //commands collection
 client.commands = new Collection();
@@ -51,10 +54,9 @@ const functionsPath = path.join(__dirname, 'lib');
 //const functionFiles = fs.readdirSync(functionsPath).filter(file => file.endsWith('.js'));
 const functionFiles = [];
 getAllNestedFiles(functionsPath);
-console.log(`found files ${functionFiles}`);
 for(const file of functionFiles){
     //const filePath = path.join(functionsPath, file);
-    console.log(`including ${file}`);
+    //console.log(`including ${file}`);
     const customFunction = require(file);
     if('name' in customFunction && 'execute' in customFunction)
         client.functions.set(customFunction.name, customFunction);
@@ -64,6 +66,18 @@ for(const file of functionFiles){
 
 //initialize cooldown collection for rate limiting, the rest is handled in interactioncreate.js
 client.cooldowns = new Collection();
+
+//compile the collection of loudspeaker clients
+loudspeakerClients.then((loudspeakerClients) => {
+    client.loudspeakers = new Collection();
+    for(const loudspeaker of loudspeakerClients){
+        client.loudspeakers.set(loudspeaker.id, loudspeaker);
+    }
+    console.log(`${loudspeakerClients.length} Loudspeakers ready`);
+},
+(error) => console.error(`Error while logging in loudspeakers:\n${error.stack}`));
+
+//functions below
 
 function getAllNestedFiles(rootDirectory){
     fs.readdirSync(rootDirectory).forEach(File => {
@@ -76,4 +90,23 @@ function getAllNestedFiles(rootDirectory){
         }
     });
     return functionFiles;
+}
+
+async function loginLoudspeakerClients(){
+    return new Promise(async (resolve) => {
+        const loudspeakerClients = [];
+        for(const token of loudspeakerTokens){
+            const loudspeakerClient = new Client({intents: GatewayIntentBits.Guilds});
+            try{
+                await loudspeakerClient.login(token);
+                console.log(`Logged in loudspeaker ${loudspeakerClient.user.tag}`);
+                loudspeakerClients.push(loudspeakerClient);
+            }
+            catch(e){
+                console.error(`Couldn't login a loudspeaker:\n${e.stack}`);
+            }
+        }
+        console.log("returning out of login function");
+        resolve(loudspeakerClients);
+    });
 }
