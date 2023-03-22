@@ -57,7 +57,7 @@ CAROLINE provides a few options for you to manage your game:
 
 To join a game, first confirm with the GM to ensure that they are willing to have you. 
 
-Once confirmed, opened the pinned messages of that channel and find the one by CAROLINE (usually at the bottom of the list). Jump to that message.
+Once confirmed, open the pinned messages of that channel and find the one by CAROLINE (usually at the bottom of the list). Jump to that message.
 There you will find the controls for the game. Click "Join/Leave Game".
 
 If the GM has restricted join mode enabled, they will be notified of your request, allowing them the option to approve or deny your request. If the game is in free join mode, you will automatically be given the role for the game, allowing you access to the channel once it is closed.
