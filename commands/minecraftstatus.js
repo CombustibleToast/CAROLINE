@@ -1,6 +1,7 @@
 const { SlashCommandBuilder, EmbedBuilder } = require("discord.js");
 const serverIp = "tosat.apexmc.co";
-let url = `https://api.mcsrvstat.us/2/${serverIp}`;
+const url = `https://api.mcsrvstat.us/2/${serverIp}`;
+const browserUrl = `https://mcsrvstat.us/server/${serverIp}`;
 
 module.exports = {
     //command definition for discord API
@@ -33,7 +34,7 @@ module.exports = {
                 interaction.followUp({embeds: [embed]});
             })
             .catch((e) => {
-                interaction.followUp(`API failure; the website didn't respond.\n${url}`);
+                interaction.followUp(`API failure; the website didn't respond.\n${browserUrl}`);
                 console.log(`mcsrvstat didn't respond:\n${e.stack}`);
             });
     }
@@ -43,7 +44,7 @@ function buildOfflineEmbed(data){
     const embed = new EmbedBuilder()
         .setColor("aa2211")
         .setTitle("Server is Currently Offline")
-        .setDescription(`The server is currently offline.\nIt's either undergoing maintenence or there isn't interest.\n${url}`);
+        .setDescription(`The server is currently offline.\nIt's either undergoing maintenence or there isn't interest.\n${browserUrl}`);
     return embed;
 }
 
@@ -51,7 +52,7 @@ function buildOnlineEmbed(data){
     const playersOnlineStatus = data.players.online == 0 ? "Nobody is currently playing." : `Currently online: ${data.players.list}`;
     //const modsStatus = `Mods: ${data.mods ? "Yes" : "Nope"}`; //doesn't detect mods for some reason
 
-    let description = `${playersOnlineStatus}\nJoin in at ${serverIp}\n${url}`;
+    let description = `${playersOnlineStatus}\nJoin in at ${serverIp}\n${browserUrl}`;
     const embed = new EmbedBuilder()
         .setColor("22ee66")
         .setTitle("The Server is Online!")
