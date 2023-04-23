@@ -3,7 +3,7 @@ CAROLINE was created to streamline the creation and maintenance of members' self
 
 # Info for Server Members
 
-**If there is ever any issue with CAROLINE, please contact Ena. CombustibleToast#7274 on Discord.**
+**If there is ever any issue with CAROLINE, please contact Ena or open an Issue on this GitHub page. CombustibleToast#7274 on Discord.**
 
 ## Commands
 
