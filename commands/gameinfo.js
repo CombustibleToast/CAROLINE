@@ -43,7 +43,7 @@ module.exports = {
         Status: ${gameData.status}\n
         Joinability: ${gameData.joinability}\n
         GM: ${interaction.guild.members.cache.get(gameData.gmId)}\n
-        Players: ${getPlayerList(interaction, gameData)}\n
+        Players: ${await getPlayerList(interaction, gameData)}\n
         `
 
         //build embed
@@ -57,10 +57,17 @@ module.exports = {
     }
 }
 
-function getPlayerList(interaction, gameData){
+async function getPlayerList(interaction, gameData){
     let playerList = "";
-    for(player of gameData.participants){
-        playerList += `${interaction.guild.members.cache.get(player)}, `
+    for(playerId of gameData.participants){
+        let playerObject = interaction.guild.members.cache.get(playerId);
+        if(!playerObject)
+            //playerobject not found, try fetching it instead of the cache
+            playerObject = await interaction.guild.members.fetch(playerId);
+        if(playerObject)
+            playerList += `${playerObject}, `
+        else
+            playerList += `${playerId}, `
     }
     return playerList
 }
