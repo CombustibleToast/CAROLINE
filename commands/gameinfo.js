@@ -42,7 +42,7 @@ module.exports = {
         Role: ${interaction.guild.roles.cache.get(gameData.roleId)}\n
         Status: ${gameData.status}\n
         Joinability: ${gameData.joinability}\n
-        GM: ${interaction.guild.members.cache.get(gameData.gmId)}\n
+        GM: ${interaction.guild.members.cache.get(gameData.gmId) ? interaction.guild.members.cache.get(gameData.gmId) : await interaction.guild.members.fetch(gameData.gmId)}\n
         Players: ${await getPlayerList(interaction, gameData)}\n
         `
 
