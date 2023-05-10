@@ -33,6 +33,12 @@ module.exports = {
 
         await interaction.deferReply();
 
+        let gmString = interaction.guild.members.cache.get(gameData.gmId) ? interaction.guild.members.cache.get(gameData.gmId) : await interaction.guild.members.fetch(gameData.gmId)
+            .catch(reason =>{
+                console.log(`[WARN] Coudld not fetch GM in gameinfo.js:\n${reason}`)
+                return gmId;
+            });
+
         //compile data
         const data = `
         Game Name: ${gameData.gameName}\n
@@ -42,7 +48,7 @@ module.exports = {
         Role: ${interaction.guild.roles.cache.get(gameData.roleId)}\n
         Status: ${gameData.status}\n
         Joinability: ${gameData.joinability}\n
-        GM: ${interaction.guild.members.cache.get(gameData.gmId) ? interaction.guild.members.cache.get(gameData.gmId) : await interaction.guild.members.fetch(gameData.gmId)}\n
+        GM: ${gmString}\n
         Players: ${await getPlayerList(interaction, gameData)}\n
         `
 
@@ -60,10 +66,9 @@ module.exports = {
 async function getPlayerList(interaction, gameData){
     let playerList = "";
     for(playerId of gameData.participants){
-        let playerObject = interaction.guild.members.cache.get(playerId);
-        if(!playerObject)
             //playerobject not found, try fetching it instead of the cache
-            playerObject = await interaction.guild.members.fetch(playerId);
+        let playerObject = interaction.guild.members.cache.get(playerId) ? interaction.guild.members.cache.get(playerId) : await interaction.guild.members.fetch(playerId);
+        
         if(playerObject)
             playerList += `${playerObject}, `
         else
