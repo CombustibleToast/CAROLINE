@@ -1,6 +1,5 @@
-const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require("discord.js");
+const { SlashCommandBuilder, EmbedBuilder } = require("discord.js");
 const { officerCheck, fetchGameFile } = require('../lib/common.js');
-const internal = require("stream");
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -36,7 +35,7 @@ module.exports = {
         let gmString = interaction.guild.members.cache.get(gameData.gmId) ? interaction.guild.members.cache.get(gameData.gmId) : await interaction.guild.members.fetch(gameData.gmId)
             .catch(reason =>{
                 console.log(`[WARN] Coudld not fetch GM in gameinfo.js:\n${reason}`)
-                return gmId;
+                return gameData.gmId;
             });
 
         //compile data
@@ -66,13 +65,14 @@ module.exports = {
 async function getPlayerList(interaction, gameData){
     let playerList = "";
     for(playerId of gameData.participants){
-            //playerobject not found, try fetching it instead of the cache
-        let playerObject = interaction.guild.members.cache.get(playerId) ? interaction.guild.members.cache.get(playerId) : await interaction.guild.members.fetch(playerId);
+        //if playerobject not found in the cache, try fetching it instead
+        let playerObject = interaction.guild.members.cache.get(playerId) ? interaction.guild.members.cache.get(playerId) : await interaction.guild.members.fetch(playerId)
+            .catch(reason =>{
+                console.log(`[WARN] Coudld not fetch GM in gameinfo.js:\n${reason}`)
+                return playerId;
+            });
         
-        if(playerObject)
-            playerList += `${playerObject}, `
-        else
-            playerList += `${playerId}, `
+        playerList += `${playerObject}, `
     }
     return playerList
 }
