@@ -6,16 +6,18 @@ const { Client, Collection, Events, GatewayIntentBits } = require('discord.js');
 const { token, loudspeakerTokens } = require('./secrets.json');
 
 // Create a new client instance for CAROLINE
-const client = new Client({ intents: [GatewayIntentBits.Guilds, 
-    GatewayIntentBits.GuildMembers, 
-    GatewayIntentBits.DirectMessages, 
-    GatewayIntentBits.MessageContent, 
+const client = new Client({
+    intents: [GatewayIntentBits.Guilds,
+    GatewayIntentBits.GuildMembers,
+    GatewayIntentBits.DirectMessages,
+    GatewayIntentBits.MessageContent,
     GatewayIntentBits.GuildMessages,
-    GatewayIntentBits.GuildVoiceStates] });
+    GatewayIntentBits.GuildVoiceStates]
+});
 
 // Log in to Discord with your client's token
 client.login(token);
-module.exports = {client};
+module.exports = { client };
 
 //create instances for loudspeakers
 const loudspeakerClients = loginLoudspeakerClients();
@@ -63,11 +65,11 @@ const functionsPath = path.join(__dirname, 'lib');
 const functionFiles = [];
 getAllNestedFiles(functionsPath, functionFiles);
 console.log(functionFiles);
-for(const file of functionFiles){
+for (const file of functionFiles) {
     //const filePath = path.join(functionsPath, file);
     //console.log(`including ${file}`);
     const customFunction = require(file);
-    if('name' in customFunction && 'execute' in customFunction)
+    if ('name' in customFunction && 'execute' in customFunction)
         client.functions.set(customFunction.name, customFunction);
     else
         console.log(`The custom function ${file} is missing a name or executable.`);
@@ -79,38 +81,38 @@ client.cooldowns = new Collection();
 //compile the collection of loudspeaker clients
 loudspeakerClients.then((loudspeakerClients) => {
     client.loudspeakers = new Collection();
-    for(const loudspeaker of loudspeakerClients){
+    for (const loudspeaker of loudspeakerClients) {
         client.loudspeakers.set(loudspeaker.user.id, loudspeaker);
     }
     console.log(`${loudspeakerClients.length} Loudspeakers ready`);
 },
-(error) => console.error(`Error while logging in loudspeakers:\n${error.stack}`));
+    (error) => console.error(`Error while logging in loudspeakers:\n${error.stack}`));
 
 //functions below
 
-function getAllNestedFiles(rootDirectory, fileList){
+function getAllNestedFiles(rootDirectory, fileList) {
     fs.readdirSync(rootDirectory).forEach(File => {
         const filePath = path.join(rootDirectory, File);
-        if(fs.statSync(filePath).isDirectory()){
+        if (fs.statSync(filePath).isDirectory()) {
             return getAllNestedFiles(filePath, fileList);
         }
-        else{
+        else {
             return fileList.push(filePath);
         }
     });
 }
 
-async function loginLoudspeakerClients(){
+async function loginLoudspeakerClients() {
     return new Promise(async (resolve) => {
         const loudspeakerClients = [];
-        for(const token of loudspeakerTokens){
-            const loudspeakerClient = new Client({intents: GatewayIntentBits.Guilds});
-            try{
+        for (const token of loudspeakerTokens) {
+            const loudspeakerClient = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates] });
+            try {
                 await loudspeakerClient.login(token);
                 console.log(`Logged in loudspeaker ${loudspeakerClient.user.tag}`);
                 loudspeakerClients.push(loudspeakerClient);
             }
-            catch(e){
+            catch (e) {
                 console.error(`Couldn't login a loudspeaker:\n${e.stack}`);
             }
         }
