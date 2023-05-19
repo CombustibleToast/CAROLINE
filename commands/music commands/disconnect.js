@@ -7,6 +7,11 @@ module.exports = {
         .setDescription('Disconnects the loudspeaker assigned to your channel'),
     
     async execute(interaction) {
+        if(!interaction.member.voice.channel){
+            await interaction.reply({content: "You need to be in a voice channel to use music commands.", ephemeral: true});
+            return;
+        }
+        
         const voiceChannelId = interaction.member.voice.channelId;
         const loudspeakerList = interaction.client.loudspeakers
         const loudspeakerAssignmentResult = await interaction.client.functions.get("assignLoudspeaker").execute(voiceChannelId, loudspeakerList);
