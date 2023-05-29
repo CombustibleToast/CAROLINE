@@ -6,7 +6,7 @@
   "dependencies": {
     "discord-player": "^5.4.0",
     "discord.js": "^14.7.1",
-    "ytdl-core": "^4.11.4",
+    "ytdl-core": "npm:@distube/ytdl-core@^4.11.10",
     "ytpl": "^2.3.0",
     "ytsr": "^3.8.2"
   },
