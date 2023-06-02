@@ -11,7 +11,9 @@ module.exports = {
             return;
         }
 
+        await interaction.deferReply({ephemeral: true});
+
         const response = await interaction.client.functions.get("pause").execute(interaction);
-        
+        await interaction.editReply(response);
     }
 }
