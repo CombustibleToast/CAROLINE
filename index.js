@@ -83,6 +83,7 @@ loudspeakerClients.then((loudspeakerClients) => {
     client.loudspeakers = new Collection();
     for (const loudspeaker of loudspeakerClients) {
         client.loudspeakers.set(loudspeaker.user.id, loudspeaker);
+        loudspeaker.parentClient = client;
     }
     console.log(`${loudspeakerClients.length} Loudspeakers ready`);
 },
