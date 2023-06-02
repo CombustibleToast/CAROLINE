@@ -3,7 +3,7 @@ const { SlashCommandBuilder } = require('discord.js')
 module.exports = {
     data: new SlashCommandBuilder()
         .setName("play")
-        .setDescription("Play a Youtube video or playlist given a URL or search query.")
+        .setDescription("Plays a Youtube video or playlist given a URL or search query.")
         .addStringOption(option =>
             option
                 .setName("query")

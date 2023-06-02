@@ -3,7 +3,7 @@ const { SlashCommandBuilder } = require('discord.js');
 module.exports = {
     data: new SlashCommandBuilder()
         .setName("enqueue")
-        .setDescription("Add a song to the playlist.")
+        .setDescription("Adds a song to the playlist.")
         .addStringOption(option =>
             option
                 .setName("query")

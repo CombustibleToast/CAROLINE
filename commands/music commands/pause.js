@@ -3,7 +3,7 @@ const { SlashCommandBuilder } = require('discord.js');
 module.exports = {
     data: new SlashCommandBuilder()
         .setName("pause")
-        .setDescription("Pause playback."),
+        .setDescription("Pauses playback."),
 
     async execute(interaction) {
         if (!interaction.member.voice.channel) {
