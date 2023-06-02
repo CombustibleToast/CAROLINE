@@ -64,7 +64,6 @@ const functionsPath = path.join(__dirname, 'lib');
 //const functionFiles = fs.readdirSync(functionsPath).filter(file => file.endsWith('.js'));
 const functionFiles = [];
 getAllNestedFiles(functionsPath, functionFiles);
-console.log(functionFiles);
 for (const file of functionFiles) {
     //const filePath = path.join(functionsPath, file);
     //console.log(`including ${file}`);
