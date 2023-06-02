@@ -26,10 +26,12 @@ module.exports = {
         }
 
         let response = await interaction.client.functions.get("enqueue").execute(interaction);
-
-        await interaction.editReply(`${response}\n\nStarting playback. (Use /enqueue to avoid this in the future.)`);
+        //response += "\n\nStarting playback. (Use /enqueue to avoid this in the future.)";
+        await interaction.editReply(response);
 
         //TODO: resume/start playback
-        const resumeResponse = interaction.client.functions.get("resumePlayback").execute(interaction);
-        }
+        response += "\n\n" + await interaction.client.functions.get("resumePlayback").execute(interaction);
+
+        await interaction.editReply(response);
+    }
 }
