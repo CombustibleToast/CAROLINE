@@ -3,12 +3,7 @@ const { SlashCommandBuilder } = require('discord.js');
 module.exports = {
     data: new SlashCommandBuilder()
         .setName("shuffle")
-        .setDescription("Shuffles the playlist.")
-        .addBooleanOption(option =>
-            option
-                .setName("clearcurrentlyplaying")
-                .setDescription("Should the current song also be removed and skipped?")
-                .setRequired(false)),
+        .setDescription("Shuffles the playlist."),
 
     async execute(interaction) {
         if (!interaction.member.voice.channel) {
