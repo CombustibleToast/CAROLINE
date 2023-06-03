@@ -12,11 +12,6 @@ module.exports = {
         ),
 
     async execute(interaction) {
-        if (!interaction.member.voice.channel) {
-            await interaction.reply({ content: "You need to be in a voice channel to use music commands.", ephemeral: true });
-            return;
-        }
-
         await interaction.client.functions.get("enqueue").execute(interaction);
     }
 }
