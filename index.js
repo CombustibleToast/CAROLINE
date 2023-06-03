@@ -116,7 +116,6 @@ async function loginLoudspeakerClients() {
                 console.error(`Couldn't login a loudspeaker:\n${e.stack}`);
             }
         }
-        console.log("returning out of login function");
         resolve(loudspeakerClients);
     });
 }
