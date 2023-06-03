@@ -3,7 +3,7 @@ const { SlashCommandBuilder } = require('discord.js');
 module.exports = {
     data: new SlashCommandBuilder()
         .setName("clear")
-        .setDescription("clear the playlist")
+        .setDescription("Clears the playlist.")
         .addBooleanOption(option =>
             option
                 .setName("clearcurrentlyplaying")
@@ -19,6 +19,6 @@ module.exports = {
         await interaction.deferReply({ephemeral: true});
 
         const response = await interaction.client.functions.get("clearQueue").execute(interaction);
-        await interaction.editReply(response);
+        await interaction.followUp(response);
     }
 }
