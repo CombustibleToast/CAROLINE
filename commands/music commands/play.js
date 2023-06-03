@@ -25,12 +25,27 @@ module.exports = {
             return;
         }
 
-        let response = await interaction.client.functions.get("enqueue").execute(interaction);
-        //response += "\n\nStarting playback. (Use /enqueue to avoid this in the future.)";
-        await interaction.editReply(response);
+        await interaction.deferReply({ephemeral: true});
+
+        const result = await interaction.client.functions.get("connectLoudspeaker").execute(interaction);
+        let response = "";
+        //respond to the user
+        switch (result.status) {
+            case "no vacancies":
+                response = "Unfortunately there are no vacant loudspeakers at this time.\n";
+                break;
+            case "already assigned":
+                response = "";
+                break;
+            case "new assignment":
+                response = "Assigned a loudspeaker to your channel.\n"
+                break;
+        }
+
+        response += await interaction.client.functions.get("enqueue").execute(interaction) + "\n";
 
         //TODO: resume/start playback
-        response += "\n\n" + await interaction.client.functions.get("resumePlayback").execute(interaction);
+        response += await interaction.client.functions.get("resumePlayback").execute(interaction);
 
         await interaction.editReply(response);
     }
