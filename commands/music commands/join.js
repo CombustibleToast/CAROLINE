@@ -9,7 +9,6 @@ module.exports = {
     async execute(interaction) {
         await interaction.deferReply({ ephemeral: true });
         //attempt to connect a loudspeaker
-        console.log("Attempting to connect a loudspeaker");
         const result = await interaction.client.functions.get("connectLoudspeaker").execute(interaction);
 
         //respond to the user
@@ -21,7 +20,5 @@ module.exports = {
 
         if (result.status == "new assignment")
             await interaction.followUp({ content: "Assigned a loudspeaker to your channel.", ephemeral: true });
-
-        console.log("Resolved loudspeaker assignment");
     }
 }
