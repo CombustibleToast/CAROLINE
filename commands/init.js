@@ -66,7 +66,12 @@ async function initMusicButtons(interaction) {
                 .setCustomId("leave")
                 .setEmoji('👋')
                 .setLabel("Leave")
-                .setStyle(ButtonStyle.Danger)
+                .setStyle(ButtonStyle.Danger),
+            new ButtonBuilder()
+                .setCustomId("squelch")
+                .setEmoji('🔕')
+                .setLabel("Disable Replies")
+                .setStyle(ButtonStyle.Secondary)
         );
 
     //row 2
