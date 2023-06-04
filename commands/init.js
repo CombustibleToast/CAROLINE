@@ -101,8 +101,29 @@ async function initMusicButtons(interaction) {
         );
 
     //row 3
-    //resume, pause, skip, loop, shuffle
+    //loop, loopOne, shuffle
     const row3 = new ActionRowBuilder()
+        .addComponents(
+            new ButtonBuilder()
+                .setCustomId("loop")
+                .setEmoji('🔁')
+                //.setLabel("")
+                .setStyle(ButtonStyle.Primary),
+            new ButtonBuilder()
+                .setCustomId("loopOne")
+                .setEmoji('🔂')
+                //.setLabel("")
+                .setStyle(ButtonStyle.Primary),
+            new ButtonBuilder()
+                .setCustomId("shuffleQueue")
+                .setEmoji('🔀')
+                //.setLabel("")
+                .setStyle(ButtonStyle.Secondary)
+        );
+
+    //row 4
+    //resume, pause, skip,
+    const row4 = new ActionRowBuilder()
         .addComponents(
             new ButtonBuilder()
                 .setCustomId("resumePlayback")
@@ -119,16 +140,6 @@ async function initMusicButtons(interaction) {
                 .setEmoji('⏭️')
                 //.setLabel("")
                 .setStyle(ButtonStyle.Secondary),
-            new ButtonBuilder()
-                .setCustomId("loop")
-                .setEmoji('🔁')
-                //.setLabel("")
-                .setStyle(ButtonStyle.Secondary),
-            new ButtonBuilder()
-                .setCustomId("shuffleQueue")
-                .setEmoji('🔀')
-                //.setLabel("")
-                .setStyle(ButtonStyle.Secondary)
         );
 
     //send rows as messages
@@ -136,4 +147,5 @@ async function initMusicButtons(interaction) {
     await channel.send({ components: [row1] });
     await channel.send({ components: [row2] });
     await channel.send({ components: [row3] });
+    await channel.send({ components: [row4] });
 }
