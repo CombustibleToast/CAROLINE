@@ -1,14 +1,18 @@
 const { REST, Routes } = require('discord.js');
 const { clientid, productionGuildId, token } = require('./secrets.json');
 const fs = require('node:fs');
+const path = require('node:path');
+
 
 const commands = [];
 // Grab all the command files from the commands folder
-const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
+//const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
+const commandFiles = [];
+getAllNestedFiles('./commands', commandFiles);
 
 // Grab the SlashCommandBuilder#toJSON() output of each command's data for deployment
 for (const file of commandFiles) {
-	const command = require(`./commands/${file}`);
+	const command = require(`./${file}`);
 	console.log(`requiring ${file}`);
 	commands.push(command.data.toJSON());
 }
@@ -34,3 +38,15 @@ const rest = new REST({ version: '10' }).setToken(token);
 		console.error(error);
 	}
 })();
+
+function getAllNestedFiles(rootDirectory, fileList){
+    fs.readdirSync(rootDirectory).forEach(File => {
+        const filePath = path.join(rootDirectory, File);
+        if(fs.statSync(filePath).isDirectory()){
+            return getAllNestedFiles(filePath, fileList);
+        }
+        else{
+            return fileList.push(filePath);
+        }
+    });
+}
