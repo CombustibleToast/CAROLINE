@@ -3,4 +3,4 @@ deploycommands.json
 data/existingGames/*.json
 data/gameApplications/*.json
 data/archivedGames/*.json
-log.txt
+node_modules/*
