@@ -1,5 +1,6 @@
 const miniget = require('miniget');
 const undici = require('undici');
+const { writeFileSync } = require('fs');
 
 
 /**
@@ -302,4 +303,10 @@ const normalizeIP = exports.normalizeIP = ip => {
     fullIP[7 - i] = parseInt(partEnd[i], 16) || 0;
   }
   return fullIP;
+};
+
+exports.saveDebugFile = (name, body) => {
+  const filename = `${+new Date()}-${name}`;
+  writeFileSync(filename, body);
+  return filename;
 };
