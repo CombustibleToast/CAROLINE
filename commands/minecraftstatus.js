@@ -11,7 +11,7 @@ module.exports = {
 
     //the funciton to be run
     async execute(interaction) {
-        const fetch = require('node-fetch');
+        //const fetch = require('node-fetch');
 
         await interaction.deferReply();
 
