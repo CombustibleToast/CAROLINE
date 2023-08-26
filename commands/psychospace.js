@@ -18,9 +18,17 @@ module.exports = {
         await interaction.deferReply();
 
         let page = interaction.options.getString("page");
-        if(!page)
-            page = 'home'
+        if(!page){
+            interaction.followUp(`# <${url}home>`);
+            return;
+        }
+
+        page = replaceSpacesWithPlusses(page);
 
         interaction.followUp(`# <${url}${page}>`);
     }
+}
+
+function replaceSpacesWithPlusses(str){
+    return str.replace(/\s/g, "+");
 }
