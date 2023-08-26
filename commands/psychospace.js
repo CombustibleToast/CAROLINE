@@ -24,6 +24,7 @@ module.exports = {
         }
 
         page = replaceSpacesWithPlusses(page);
+        page = fixIOSApostrophe(page);
 
         interaction.followUp(`# <${url}${page}>`);
     }
@@ -31,4 +32,10 @@ module.exports = {
 
 function replaceSpacesWithPlusses(str){
     return str.replace(/\s/g, "+");
+}
+
+function fixIOSApostrophe(str){
+    str = str.replace(/’/g, "'");
+    str = str.replace(/‘/g, "'");
+    return str;
 }
