@@ -14,7 +14,7 @@ module.exports = {
     async execute(interaction){
         await interaction.deferReply();
         const reply = await standardRoll(interaction.options.getString('query'));
-        console.log(`Function returned ${reply}`);
+        //console.log(`Function returned ${reply}`);
         await interaction.followUp(reply);
     }
 }
@@ -52,7 +52,7 @@ function roll(tokens){
     while(tokens.length > 0){
         //reading the first token in the array requires a shift
         const curToken = tokens.shift();
-        console.log(`cur token ${curToken}`);
+        //console.log(`cur token ${curToken}`);
 
         //if the token is a left parenthesis, just push it
         if(curToken == "(")
@@ -86,7 +86,7 @@ function roll(tokens){
 
             //if there was an error rolling the term
             if(curValue.error){
-                console.log(`error value: ${curValue.term}`);
+                //console.log(`error value: ${curValue.term}`);
                 return {error: true, term: curValue.term}
             }
 
@@ -120,7 +120,7 @@ function compileResponse(query, objs, finalVal){
 
 function collapseDiceValue(term){
     if(!/\d*d\d+((dl|kh)\d+|)/.test(term)){
-        console.log('invalid dice term');
+        //console.log('invalid dice term');
 
         return {
             value : undefined,
@@ -131,7 +131,7 @@ function collapseDiceValue(term){
             error: true
         }
     }
-    console.log('valid dice term');
+    //console.log('valid dice term');
     //parse the term into values
     const dice = /\d*d\d+/.exec(term)[0];
     const numDice = isNaN(parseInt(dice.substring(0, dice.indexOf("d")))) ? 1 : parseInt(dice.substring(0, dice.indexOf("d")));
@@ -140,7 +140,7 @@ function collapseDiceValue(term){
     keep = keep == null ? undefined : keep[0];
     const keepType = keep == undefined ? undefined : /(k|d)(h|l)/.exec(keep)[0];
     const numKeep = keep == undefined ? undefined : parseInt(/\d+/.exec(keep)[0]);
-    console.log(`parsed ${numDice}d${dieType} ${keepType}${numKeep}`);
+    //console.log(`parsed ${numDice}d${dieType} ${keepType}${numKeep}`);
 
     //roll and store results
     const rolls = [];
@@ -152,7 +152,7 @@ function collapseDiceValue(term){
     keptRolls.sort((a,b) => {
         return b-a;
     });
-    console.log(`sorted rolls: ${keptRolls}`);
+    //console.log(`sorted rolls: ${keptRolls}`);
     if(keep != undefined){
         switch(keepType){
             case "": break;
@@ -179,7 +179,7 @@ function performOperation(op, a, b){
     //a and b are numbers to be operated upon in the order b op a
     //they're reversed because of the way they're popped from the stack lol idk
 
-    console.log(`performing operation ${a.value} ${op} ${b.value}`);
+    //console.log(`performing operation ${a.value} ${op} ${b.value}`);
     let result;
     switch(op){
         case "+": result = {value: b.value + a.value, rolled: false}; break;
@@ -189,7 +189,7 @@ function performOperation(op, a, b){
         case "%": result = {value: b.value % a.value, rolled: false}; break;
         default: throw `Invalid operator ${op}`;
     }
-    console.log(`result of operation: ${result.value}`);
+    //console.log(`result of operation: ${result.value}`);
     return result;
 }
 
