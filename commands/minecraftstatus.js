@@ -1,5 +1,5 @@
 const { SlashCommandBuilder, EmbedBuilder } = require("discord.js");
-const serverIp = "tosat.apexmc.co";
+const serverIp = "tosat.ddns.net";
 const url = `https://api.mcsrvstat.us/2/${serverIp}`;
 const browserUrl = `https://mcsrvstat.us/server/${serverIp}`;
 
