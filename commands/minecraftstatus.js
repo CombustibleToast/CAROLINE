@@ -1,7 +1,9 @@
 const { SlashCommandBuilder, EmbedBuilder } = require("discord.js");
+const { name } = require("../lib/musicFunctions/nowPlaying");
 const serverIp = "tosat.ddns.net";
-const url = `https://api.mcsrvstat.us/2/${serverIp}`;
+const url = `https://api.mcsrvstat.us/3/${serverIp}`;
 const browserUrl = `https://mcsrvstat.us/server/${serverIp}`;
+const trainmapUrl = `http://${serverIp}:3876`
 
 module.exports = {
     //command definition for discord API
@@ -49,10 +51,11 @@ function buildOfflineEmbed(data){
 }
 
 function buildOnlineEmbed(data){
-    const playersOnlineStatus = data.players.online == 0 ? "Nobody is currently playing." : `Currently online: ${data.players.list}`;
+    const playersOnlineStatus = data.players.online == 0 ? "Nobody is currently playing." : `Currently online: ${getPlayerNameList(data.players.list)}`;
+    const trainMapNotice = `You can view the status and location of all trains on the server here: ${trainmapUrl}`
     //const modsStatus = `Mods: ${data.mods ? "Yes" : "Nope"}`; //doesn't detect mods for some reason
 
-    let description = `${playersOnlineStatus}\nJoin in at ${serverIp}\n${browserUrl}`;
+    let description = `${playersOnlineStatus}\nJoin in at ${serverIp}\n${browserUrl}\n${trainMapNotice}`;
     const embed = new EmbedBuilder()
         .setColor("22ee66")
         .setTitle("The Server is Online!")
@@ -60,6 +63,11 @@ function buildOnlineEmbed(data){
     return embed;
 }
 
-function sleep(ms){
+function getPlayerNameList(objectList){
+    const nameList = [];
+    objectList.forEach(player => {
+        nameList.push(player.name)
+    });
 
+    return nameList;
 }
