@@ -34,7 +34,7 @@ module.exports = {
 
             //store the command
             const command = interaction.client.commands.get(interaction.commandName);
-            console.log(`${command == "pushReportForm" || command == "reportFormSubmission" ? "someone" : interaction.user.tag} is performing command ${interaction.commandName}`);
+            console.log(`${interaction.user.username} is performing command ${interaction.commandName}`);
             
             //do nothing if the command doesn't exist
             if (!command) {
@@ -57,7 +57,7 @@ module.exports = {
         
         //handle functions
         const funcName = /[a-zA-Z]+/.exec(interaction.customId)[0];
-        console.log(`${interaction.user.tag} is performing function ${funcName}`);
+        console.log(`${funcName == "pushReportForm" || funcName == "reportFormSubmission" ? "someone" : interaction.user.username} is performing function ${funcName}`);
 
         //get the associated function
         const func = interaction.client.functions.get(funcName);
