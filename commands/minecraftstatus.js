@@ -1,5 +1,4 @@
 const { SlashCommandBuilder, EmbedBuilder } = require("discord.js");
-const { name } = require("../lib/musicFunctions/nowPlaying");
 const serverIp = "tosat.apexmc.co";
 const url = `https://api.mcsrvstat.us/3/${serverIp}`;
 const browserUrl = `https://mcsrvstat.us/server/${serverIp}`;
