@@ -3,8 +3,8 @@ const { name } = require("../lib/musicFunctions/nowPlaying");
 const serverIp = "tosat.apexmc.co";
 const url = `https://api.mcsrvstat.us/3/${serverIp}`;
 const browserUrl = `https://mcsrvstat.us/server/${serverIp}`;
-const trainmapUrl = `http://${serverIp}:5145`
-const dynMapUrl = `http://${serverIp}:5900`
+const trainmapUrl = `http://${serverIp}:9756`
+const dynMapUrl = `http://${serverIp}:9045`
 
 module.exports = {
     //command definition for discord API
@@ -53,11 +53,12 @@ function buildOfflineEmbed(data){
 
 function buildOnlineEmbed(data){
     const playersOnlineStatus = data.players.online == 0 ? "Nobody is currently playing." : `Currently online: ${getPlayerNameList(data.players.list)}`;
-    const trainMapNotice = `You can view the status and location of all trains on the server here: ${trainmapUrl}`
-    const dynMapNotice = `You can view a live map of the server here: ${dynMapUrl}`
+    const webViewLink = `- [Status Webview](${browserUrl})`
+    const dynMapNotice = `- [Live Map](${dynMapUrl})`
+    const trainMapNotice = `- [Train Map](${trainmapUrl})`
     //const modsStatus = `Mods: ${data.mods ? "Yes" : "Nope"}`; //doesn't detect mods for some reason
 
-    let description = `${playersOnlineStatus}\nJoin in at ${serverIp}\nServer status site:${browserUrl}\n${trainMapNotice}\n${dynMapNotice}`;
+    let description = `${playersOnlineStatus}\nJoin in at ${serverIp}\n${webViewLink}\n${dynMapNotice}\n${trainMapNotice}`;
     const embed = new EmbedBuilder()
         .setColor("22ee66")
         .setTitle("The Server is Online!")
