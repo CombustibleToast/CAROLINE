@@ -22,6 +22,9 @@ module.exports = {
             case "music":
                 await initMusicButtons(interaction);
                 break;
+            case "promo":
+                await initPromoForm(interaction);
+                break;
             default:
                 await initGmAndReportForm(interaction);
                 break;
@@ -150,4 +153,23 @@ async function initMusicButtons(interaction) {
     await channel.send({ components: [row2] });
     await channel.send({ components: [row3] });
     await channel.send({ components: [row4] });
+}
+
+async function initPromoForm(interaction){
+    const rules = "1. No scams, MLMs, or anything of that sort.\n2. Do not promote things that break the GMU honor code.\n3. Do not promote illegal material or content.\n4. Enter the word tomato in the form's first text area.\n5. Do not promote the same thing more than once in a 30-day period."
+
+    const embed = new EmbedBuilder()
+        .setColor(0xFFFFFF)
+        .setTitle("Self-Promo Form")
+        .setDescription(`Have someting you want to promote? Fill out this form!\n# Rules\n${rules}`);
+    
+    const actionRow = new ActionRowBuilder()
+    .addComponents(
+        new ButtonBuilder()
+            .setCustomId("promoFormPush")
+            .setLabel("Promotion Form")
+            .setStyle(ButtonStyle.Primary)
+    );
+    
+    await interaction.channel.send({ embeds: [embed], components: [actionRow] });
 }
