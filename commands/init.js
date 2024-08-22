@@ -156,7 +156,7 @@ async function initMusicButtons(interaction) {
 }
 
 async function initPromoForm(interaction){
-    const rules = "1. No scams, MLMs, or anything of that sort.\n2. Do not promote things that break the GMU honor code.\n3. Do not promote illegal material or content.\n4. Enter the word tomato in the form's first text area.\n5. Do not promote the same thing more than once in a 30-day period."
+    const rules = "1. No scams, MLMs, or anything of that sort.\n2. Do not promote things that break the GMU honor code.\n3. Do not promote illegal material or content.\n4. Enter the word tomato in the form's first text area.\n5. Do not promote the same thing more than once in a 30-day period.\n6. Please only promote things related to TTRPGs and gaming in general.\nFeel free to ask an officer if you have any questions."
 
     const embed = new EmbedBuilder()
         .setColor(0xFFFFFF)
